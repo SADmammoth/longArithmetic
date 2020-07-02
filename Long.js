@@ -23,12 +23,12 @@ function Long(numberString) {
     },
     slice: (limit) => {
       return {
-        number: sliceNumber(self.number, limit),
+        number: sliceNumber(self.number, limit, chunk),
         ...methods,
       };
     },
     mutatingSlice: (limit) => {
-      self.number = sliceNumber(self.number, limit);
+      self.number = sliceNumber(self.number, limit, chunk);
     },
   };
 
