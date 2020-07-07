@@ -1,6 +1,15 @@
 (function () {
-  let long = new Long(Math.random().toString(10).slice(2));
-  let long2 = new Long(Math.random().toString(10).slice(2));
-  console.log(long, long2, long.toString(), long2.toString(), long.add(long2));
-  // console.log(splitLittleEndian('1234567881232223', 4));
+  console.time();
+  let long = new Long(generateNum(600000));
+  let long2 = new Long(generateNum(600000));
+  console.log(long.add(long2).toString());
+  console.timeLog();
 })();
+
+function generateNum(randomCount) {
+  let numb = [];
+  for (let i = 0; i <= randomCount; i++) {
+    numb.push(Math.random().toString(10).slice(2));
+  }
+  return numb.join('');
+}

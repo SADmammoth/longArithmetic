@@ -1,5 +1,5 @@
 function Long(numberString, degree) {
-  let chunk = 4;
+  let chunk = 10;
   let number;
   let numberLength = degree;
   if (typeof numberString === 'number') {
@@ -10,12 +10,6 @@ function Long(numberString, degree) {
   } else {
     if (!degree) numberLength = numberString.length;
     number = splitLittleEndian(numberString, chunk);
-    //.replace(/((?:^.*[^0])|(?:^))[0]+$/,'$10')
-    // .match(new RegExp(`[0-9]{1,${chunk}}`, 'g'))
-    // .map((el) => {
-    //   console.log(el);
-    //   return parseInt(el);
-    // });
   }
 
   let self = {
@@ -25,10 +19,13 @@ function Long(numberString, degree) {
 
   let methods = {
     toString: () => {
-      return self.number
+      return [...self.number]
         .reverse()
         .map((number, index) => {
-          if (index) return number.toString(10).padStart(chunk, '0');
+          if (index) {
+            return number.toString(10).padStart(chunk, '0');
+          }
+          return number.toString(10);
         })
         .join('')
         .slice(0, self.degree);
@@ -56,12 +53,12 @@ function Long(numberString, degree) {
       let newDegree = big.degree;
       for (let i = 0; i <= big.number.length - 1; i++) {
         if (small.number[i] === undefined) {
-          newLong.push(big.number[i]);
-          continue;
+          sum = big.number[i] + overflow;
+        } else {
+          sum = small.number[i] + big.number[i] + overflow;
         }
-        sum = small.number[i] + big.number[i] + overflow;
-        overflow = parseInt(sum / 10 ** (chunk + 1));
-        console.log(sum, i, newLong, sum / 10 ** (chunk + 1));
+        overflow = parseInt(sum / 10 ** chunk);
+
         newLong.push(getLast(sum, chunk));
       }
 
@@ -69,56 +66,7 @@ function Long(numberString, degree) {
         newLong.push(overflow);
         newDegree += overflow.toString(10).length;
       }
-
-      console.log(overflow);
-
       return new Long(newLong, newDegree);
-      //   if (small.number[0].length <= chunk && big.number[0].length <= chunk) {
-      //     return new Long(
-      //       small.number[0] * 10 ** small.degree +
-      //         big.number[0] * 10 ** self.degree
-      //     );
-      //   }
-      //   let overflow = 0;
-      //   let newNumber = [];
-      //   function sum(left, right, overflow) {
-      //     return left + right + overflow;
-      //   }
-
-      //   let prevSum = small.number[0] + big.number[0];
-      //   let numLength = (num) => num.toString(10).length;
-      //   let buffer;
-      //   if (big.degree < small.degree) {
-      //     buffer = small;
-      //     small = big;
-      //     big = buffer;
-      //   }
-
-      //   small.number = small.number.reverse();
-      //   big.number = big.number.reverse();
-      //   console.log(small, big);
-      //   let bigLength = big.number.length;
-      //   let smallLength = small.number.length;
-
-      //   let obj;
-      //   for (let i = 0; i <= bigLength - 1; i++) {
-      //     obj = calcOverflow(small, big, chunk, overflow, i);
-      //     prevSum = obj.prevSum;
-      //     overflow = obj.overflow;
-      //     newNumber.push(getLast(prevSum, chunk));
-      //   }
-
-      //   let newDegree = big.degree;
-      //   if (overflow !== 0) {
-      //     newNumber.push(overflow);
-      //     newDegree += overflow.toString(10).length;
-      //     return new Long(
-      //       newNumber.reverse().join('').padEnd(newDegree, '0'),
-      //       newDegree
-      //     );
-      //   }
-      //   console.log(newNumber);
-      //   return new Long(newNumber.reverse().join('').newDegree);
     },
   };
 
@@ -159,42 +107,6 @@ function sliceNumber(number, limit, chunk) {
 
 function sliceByChunk() {
   return number.slice(0, int + 1);
-}
-
-function calcOverflow(self, long, chunk, overflow, index) {
-  let newOverflow;
-  if (self.number[index] === undefined) {
-    self.number[index] = 0;
-  }
-  let isLast =
-    index === 0 &&
-    (self.number[index].toString(10).length < chunk ||
-      long.number[index].toString(10).length < chunk);
-
-  let power = chunk;
-  if (isLast) {
-    let longLast = calcLast(long, chunk);
-    let selfLast = calcLast(self, chunk);
-    console.log(longLast, selfLast);
-    power = longLast >= selfLast ? selfLast : longLast;
-  }
-  sum = long.number[index] + self.number[index] + overflow;
-  newOverflow = parseInt(sum / 10 ** power);
-  console.log(
-    sum,
-    power,
-    self.number[index],
-    long.number[index],
-    overflow,
-    newOverflow
-  );
-
-  return { prevSum: getLast(sum, power), overflow: newOverflow };
-}
-
-function calcLast(num, chunk) {
-  console.log(num, chunk, 2);
-  return num.degree - chunk * (num.number.length - 1);
 }
 
 function splitLittleEndian(str, chunk) {
