@@ -1,10 +1,12 @@
 function Long(numberString, degree) {
-  let chunk = 8;
+  let chunk = 4;
   let number;
   let numberLength = degree;
   if (typeof numberString === 'number') {
     number = [parseInt(numberString.toString(10).slice(0, chunk))];
     if (!degree) numberLength = numberString.toString(10).length;
+  } else if (numberString instanceof Array) {
+    number = numberString;
   } else {
     if (!degree) numberLength = numberString.length;
     number = splitLittleEndian(numberString, chunk);
@@ -24,8 +26,10 @@ function Long(numberString, degree) {
   let methods = {
     toString: () => {
       return self.number
-        .map((number) => number.toString(10).padEnd(chunk, '0'))
         .reverse()
+        .map((number, index) => {
+          if (index) return number.toString(10).padStart(chunk, '0');
+        })
         .join('')
         .slice(0, self.degree);
     },
@@ -36,54 +40,85 @@ function Long(numberString, degree) {
       self.number = sliceNumber(self.number, limit);
     },
     add: (long) => {
-      let small = { ...self, number: [...self.number] };
-      let big = { ...long, number: [...long.number] };
-      if (small.number[0].length <= chunk && big.number[0].length <= chunk) {
-        return new Long(
-          small.number[0] * 10 ** small.degree +
-            big.number[0] * 10 ** self.degree
-        );
+      let small;
+      let big;
+      if (long.degree < self.degree) {
+        small = { ...long, number: [...long.number] };
+        big = { ...self, number: [...self.number] };
+      } else {
+        big = { ...long, number: [...long.number] };
+        small = { ...self, number: [...self.number] };
       }
+
+      let sum = 0;
       let overflow = 0;
-      let newNumber = [];
-      function sum(left, right, overflow) {
-        return left + right + overflow;
-      }
-
-      let prevSum = small.number[0] + big.number[0];
-      let numLength = (num) => num.toString(10).length;
-      let buffer;
-      if (big.degree < small.degree) {
-        buffer = small;
-        small = big;
-        big = buffer;
-      }
-
-      small.number = small.number.reverse();
-      big.number = big.number.reverse();
-      console.log(small, big);
-      let bigLength = big.number.length;
-      let smallLength = small.number.length;
-
-      let obj;
-      for (let i = 0; i <= bigLength - 1; i++) {
-        obj = calcOverflow(small, big, chunk, overflow, i);
-        prevSum = obj.prevSum;
-        overflow = obj.overflow;
-        newNumber.push(getLast(prevSum, chunk));
-      }
-
+      let newLong = [];
       let newDegree = big.degree;
-      if (overflow !== 0) {
-        newNumber.push(overflow);
-        newDegree += overflow.toString(10).length;
-        return new Long(
-          newNumber.reverse().join('').padEnd(newDegree, '0'),
-          newDegree
-        );
+      for (let i = 0; i <= big.number.length - 1; i++) {
+        if (small.number[i] === undefined) {
+          newLong.push(big.number[i]);
+          continue;
+        }
+        sum = small.number[i] + big.number[i] + overflow;
+        overflow = parseInt(sum / 10 ** (chunk + 1));
+        console.log(sum, i, newLong, sum / 10 ** (chunk + 1));
+        newLong.push(getLast(sum, chunk));
       }
-      console.log(newNumber);
-      return new Long(newNumber.reverse().join('').newDegree);
+
+      if (overflow !== 0) {
+        newLong.push(overflow);
+        newDegree += overflow.toString(10).length;
+      }
+
+      console.log(overflow);
+
+      return new Long(newLong, newDegree);
+      //   if (small.number[0].length <= chunk && big.number[0].length <= chunk) {
+      //     return new Long(
+      //       small.number[0] * 10 ** small.degree +
+      //         big.number[0] * 10 ** self.degree
+      //     );
+      //   }
+      //   let overflow = 0;
+      //   let newNumber = [];
+      //   function sum(left, right, overflow) {
+      //     return left + right + overflow;
+      //   }
+
+      //   let prevSum = small.number[0] + big.number[0];
+      //   let numLength = (num) => num.toString(10).length;
+      //   let buffer;
+      //   if (big.degree < small.degree) {
+      //     buffer = small;
+      //     small = big;
+      //     big = buffer;
+      //   }
+
+      //   small.number = small.number.reverse();
+      //   big.number = big.number.reverse();
+      //   console.log(small, big);
+      //   let bigLength = big.number.length;
+      //   let smallLength = small.number.length;
+
+      //   let obj;
+      //   for (let i = 0; i <= bigLength - 1; i++) {
+      //     obj = calcOverflow(small, big, chunk, overflow, i);
+      //     prevSum = obj.prevSum;
+      //     overflow = obj.overflow;
+      //     newNumber.push(getLast(prevSum, chunk));
+      //   }
+
+      //   let newDegree = big.degree;
+      //   if (overflow !== 0) {
+      //     newNumber.push(overflow);
+      //     newDegree += overflow.toString(10).length;
+      //     return new Long(
+      //       newNumber.reverse().join('').padEnd(newDegree, '0'),
+      //       newDegree
+      //     );
+      //   }
+      //   console.log(newNumber);
+      //   return new Long(newNumber.reverse().join('').newDegree);
     },
   };
 
