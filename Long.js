@@ -6,15 +6,16 @@ function Long(numberString, degree) {
     number = [parseInt(numberString.toString(10).slice(0, chunk))];
     if (!degree) numberLength = numberString.toString(10).length;
   } else if (numberString instanceof Array) {
-    if(!numberString.filter(num=> !!num).length){
+    if (!numberString.filter(num => !!num).length) {
       number = [0];
-    numberLength = 1;
-      
-    }else{
-    number = numberString;}
+      numberLength = 1;
+
+    } else {
+      number = numberString;
+    }
   } else {
-    
-    if (!degree) numberLength = numberString.length;
+
+    if (!degree) numberLength = numberString[0] === '-' ? numberString.length - 1 : numberString.length;
     number = splitLittleEndian(numberString, chunk);
   }
 
@@ -25,7 +26,7 @@ function Long(numberString, degree) {
 
   let methods = {
     toString: () => {
-      return [...self.number]
+      return (self.number[0] < 0?'-':'')+[...self.number]
         .reverse()
         .map((number, index) => {
           if (index) {
@@ -45,7 +46,7 @@ function Long(numberString, degree) {
     add: (long) => {
       let small;
       let big;
-      if (long.degree < self.degree) {
+      if (self.compareModule(long) > 0) {
         small = { ...long, number: [...long.number] };
         big = { ...self, number: [...self.number] };
       } else {
@@ -57,17 +58,26 @@ function Long(numberString, degree) {
       let overflow = 0;
       let newLong = [];
       let newDegree = big.degree;
+      console.log(big.toString());
+      let negativeResult = big.number[0] < 0;
       for (let i = 0; i <= big.number.length - 1; i++) {
         if (small.number[i] === undefined) {
-          sum = abs(big.number[i] + overflow);
+          sum = getLast(big.number[i] + overflow, chunk);
         } else {
-          sum = abs(small.number[i] + big.number[i] + overflow);
+          sum = getLast(small.number[i] + big.number[i] + overflow, chunk);
         }
         overflow = parseInt(sum / 10 ** chunk);
         console.log(small.number[i], big.number[i], sum, overflow)
-if(getLast(sum, chunk) !== 0){
-        newLong.push(getLast(sum, chunk));}else{
-         newDegree -= big.number[i].toString(10).length
+        
+        if (sum !== 0) {
+          if (negativeResult) {
+            sum = -abs(sum);
+          }else{
+            sum = abs(sum);
+          }
+          newLong.push(sum);
+        } else {
+          newDegree -= big.number[i].toString(10).length
         }
       }
 
@@ -77,6 +87,43 @@ if(getLast(sum, chunk) !== 0){
       }
       return new Long(newLong, newDegree);
     },
+    compare: (long) => {
+      let selfIsNeg = self.number[0] < 0;
+      let longIsNeg = long.number[0] < 0;
+      if (selfIsNeg && !longIsNeg) {
+        return -1;
+      }
+      if (!selfIsNeg && longIsNeg) {
+        return 1;
+      }
+      if (!self.number[0] && long.number[0] > 0) {
+        return -1;
+      }
+      if (!long.number[0] && self.number[0] > 0) {
+        return 1;
+      }
+      return self.compareModule(long);
+    },
+    compareModule: (long) => {
+      if (self.degree !== long.degree) {
+        if (self.degree < long.degree) { return -1; }
+        else if (self.degree > long.degree) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+      for (let i = long.number.length - 1; i >= 0; i--) {
+        console.log(abs(self.number[i]), abs(long.number[i]))
+        if (abs(self.number[i]) < abs(long.number[i])) {
+          return -1;
+        }
+        if (abs(self.number[i]) > abs(long.number[i])) {
+          return 1;
+        }
+      }
+      return 0;
+    }
   };
 
   Object.entries(methods).forEach(([name, method]) => (self[name] = method));
@@ -127,7 +174,7 @@ function splitLittleEndian(str, chunk) {
   let number = new Array(chunkCount).fill('');
   let index;
   let string;
-  if(isNegative){
+  if (isNegative) {
     str = str.slice(1);
   }
   console.log(str);
@@ -136,7 +183,7 @@ function splitLittleEndian(str, chunk) {
     if ((str.length - i) % chunk === 0) {
       index = parseInt((str.length - i - 1) / chunk);
       number[index] = parseInt(string);
-      if(isNegative){
+      if (isNegative) {
         number[index] = -number[index];
       }
       string = '';
@@ -144,9 +191,9 @@ function splitLittleEndian(str, chunk) {
   }
   if (string) {
     number[index + 1] = parseInt(string);
-     if (isNegative) {
-       number[index+1] = -number[index+1];
-     }
+    if (isNegative) {
+      number[index + 1] = -number[index + 1];
+    }
   }
   return number;
 }
@@ -161,6 +208,6 @@ function ceil(num) {
   return num > int ? int + 1 : int;
 }
 
-function abs(num){
-  return num < 0? -num:num;
+function abs(num) {
+  return num < 0 ? -num : num;
 }

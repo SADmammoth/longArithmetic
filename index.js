@@ -1,8 +1,8 @@
 (function () {
   console.time();
   let long = new Long('12345678');
-  let long2 = new Long('-9876543');
-  console.log(long2, long.add(long2), long.add(long2).toString());
+  let long2 = new Long('-98765432');
+  console.log(long2,long.add(long2), long.add(long2).toString());
   console.timeLog();
 })();
 
