@@ -26,7 +26,7 @@ function Long(numberString, degree) {
 
   let methods = {
     toString: () => {
-      return (self.number[0] < 0?'-':'')+[...self.number]
+      return (self.number[0] < 0 ? '-' : '') + [...self.number]
         .reverse()
         .map((number, index) => {
           if (index) {
@@ -44,48 +44,9 @@ function Long(numberString, degree) {
       self.number = sliceNumber(self.number, limit);
     },
     add: (long) => {
-      let small;
-      let big;
-      if (self.compareModule(long) > 0) {
-        small = { ...long, number: [...long.number] };
-        big = { ...self, number: [...self.number] };
-      } else {
-        big = { ...long, number: [...long.number] };
-        small = { ...self, number: [...self.number] };
-      }
-
-      let sum = 0;
-      let overflow = 0;
-      let newLong = [];
-      let newDegree = big.degree;
-      console.log(big.toString());
-      let negativeResult = big.number[0] < 0;
-      for (let i = 0; i <= big.number.length - 1; i++) {
-        if (small.number[i] === undefined) {
-          sum = getLast(big.number[i] + overflow, chunk);
-        } else {
-          sum = getLast(small.number[i] + big.number[i] + overflow, chunk);
-        }
-        overflow = parseInt(sum / 10 ** chunk);
-        console.log(small.number[i], big.number[i], sum, overflow)
-        
-        if (sum !== 0) {
-          if (negativeResult) {
-            sum = -abs(sum);
-          }else{
-            sum = abs(sum);
-          }
-          newLong.push(sum);
-        } else {
-          newDegree -= big.number[i].toString(10).length
-        }
-      }
-
-      if (overflow !== 0) {
-        newLong.push(overflow);
-        newDegree += overflow.toString(10).length;
-      }
-      return new Long(newLong, newDegree);
+      return operation(self, long, chunk, (a, b) => a + b, false);
+    },multiply: (long) => {
+      return operation(self, long, chunk, (a, b) => a * b, false);
     },
     compare: (long) => {
       let selfIsNeg = self.number[0] < 0;
@@ -210,4 +171,69 @@ function ceil(num) {
 
 function abs(num) {
   return num < 0 ? -num : num;
+}
+
+function operation(self, long, chunk, numberOperation, negativeOverflow) {
+  let small;
+  let big;
+  if (self.compareModule(long) > 0) {
+    small = { ...long, number: [...long.number] };
+    big = { ...self, number: [...self.number] };
+  } else {
+    big = { ...long, number: [...long.number] };
+    small = { ...self, number: [...self.number] };
+  }
+
+  let sum = 0;
+  let overflow = 0;
+  let newLong = [];
+  let newDegree = big.degree;
+  console.log(big.toString());
+  let negativeResult = big.number[0] < 0;
+  let currentChunk;
+  let i;
+  for (i = 0; i <= big.number.length - 1; i++) {
+    currentChunk = small.number[i].toString().length < big.number[i].toString().length? big.number[i].toString().length: small.number[i].toString().length
+    if (small.number[i] === undefined) {
+      sum = big.number[i] + overflow;
+    } else {
+      sum = numberOperation(small.number[i], big.number[i]) + overflow;
+    }
+
+    overflow = parseInt(sum / 10 ** currentChunk);
+    if (negativeOverflow) {
+      overflow = -overflow;
+    }
+    console.log(small.number[i], big.number[i], sum, overflow)
+
+    if (sum !== 0) {
+      if (negativeResult) {
+        sum = -abs(sum);
+      } else {
+        sum = abs(sum);
+      }
+      if(i !== 0 && newLong[i-1].toString().length < chunk)
+      {newLong[i-1] = (getLast(sum, chunk-newLong[i-1].toString().length) * (10**newLong[i-1].toString().length)+newLong[i-1]);
+      overflow = parseInt(newLong[i-1]/(10**(chunk-newLong[i-1].toString().length)))
+    }else{
+      newLong.push(getLast(sum, currentChunk));
+    }} else {
+      newDegree -= big.number[i].toString(10).length
+    }
+  }
+
+  if (overflow !== 0) {
+    if (newLong[i-1].toString().length < chunk)
+    {
+      newLong[i-1] =(getLast(overflow,chunk-newLong[i-1].toString().length) * (10 ** newLong[i-1].toString().length) + newLong[i-1]);
+    
+      overflow = parseInt(newLong[i-1]/(10**(chunk-newLong[i-1].toString().length)))
+      newLong.push(overflow)
+    }else{
+    newLong.push(overflow);
+      }
+    
+    newDegree += overflow.toString(10).length;
+  }
+  return new Long(newLong, newDegree);
 }
