@@ -1,8 +1,8 @@
 (function () {
   console.time();
-  let long = new Long('1234');
-  let long2 = new Long('4321');
-  console.log(long2,long.multiply(long2), long.multiply(long2).toString());
+  let long = new Long('30218');
+  let long2 = new Long('512');
+  console.log(long2,long.divide(long2), long.divide(long2).toString());
   console.timeLog();
 })();
 
