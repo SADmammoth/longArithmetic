@@ -1,3 +1,5 @@
+
+
 function Long(numberString, degree) {
   let chunk = 4;
   let number;
@@ -23,7 +25,7 @@ function Long(numberString, degree) {
     number,
     degree: numberLength,
   };
-
+  
   let methods = {
     toString: () => {
       return (self.number[0] < 0 ? '-' : '') + [...self.number]
@@ -44,8 +46,24 @@ function Long(numberString, degree) {
       self.number = sliceNumber(self.number, limit);
     },
     add: (long) => {
-      return operation(self, long, chunk, (a, b) => a + b, false);
-    },multiply: (long) => {
+      return operation(self, long, chunk, (a, b, o) => a + b + o, false);
+    },
+    subtract: (long)=>{
+      return operation (self, long, chunk, (a,b,o)=>{  
+        if(a>b){
+          let ch = (b)=>b.toString(10).length
+        let res = b +o;
+        while(ch(b) <chunk){
+          res = 90*10**ch(res)- a;
+      
+        }
+        return res;
+        }
+        return b-a+o;
+        console.log(a>b?10**(chunk) +ch - a + b+ o:b-a+o)
+            return a>b?10**(chunk) +ch- a + b+ o:b-a+o}, true);
+    },
+    multiply: (long) => {
       return operation(self, long, chunk, (a, b) => a * b, false);
     },
     divide: (long)=>{
@@ -191,62 +209,44 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
   let overflow = 0;
   let newLong = [];
   let newDegree = big.degree;
-  console.log(big.toString());
+  
   let negativeResult = big.number[0] < 0;
   let currentChunk;
   let i;
   let j = 1;
-  for (i = 0; i <= big.number.length - 1; i++) {
+  
+  for (i = 0; i <= big.number.length; i++) {
     
     if (small.number[i] === undefined) {
+      
       sum = big.number[i] + overflow;
-      newLong.push(sum);
-      continue;
+      console.log(sum)
     } else {
-      sum = numberOperation(small.number[i], big.number[i]) + overflow;
+      console.log('k')
+      sum = numberOperation(small.number[i], big.number[i], overflow);
     }
+   
+    overflow = parseInt(sum / 10 ** chunk);
+   if(!negativeOverflow){
+     overflow=-overflow;
+   }
     
-    currentChunk = small.number[i].toString().length < big.number[i].toString().length? big.number[i].toString().length: small.number[i].toString().length
-console.log('g')
-    overflow = parseInt(sum / 10 ** currentChunk);
-    
-    if (negativeOverflow) {
-      overflow = -overflow;
-    }
-    console.log(small.number[i], big.number[i], sum, overflow)
-
     if (sum !== 0) {
       if (negativeResult) {
         sum = -abs(sum);
       } else {
         sum = abs(sum);
       }
-      console.log(i, j, newLong)
-      if(newLong[i-j] && newLong[i-j].toString().length < chunk)
-      {console.log('h');newLong[i-j] = (getLast(sum, chunk-newLong[i-j].toString().length) * (10**newLong[i-j].toString().length)+newLong[i-j]);
-      overflow = parseInt(newLong[i-j]/(10**(chunk-newLong[i-j].toString().length)))
-      j++;
-    }else{
-      j= 1;
-      newLong.push(getLast(sum, currentChunk));
-    }} else {
-      newDegree -= big.number[i].toString(10).length
-    }
-    console.log('h')
+      
+
+      newLong.push(getLast(sum, chunk));
   }
-console.log('h')
-  if (overflow !== 0) {
-    if (newLong[i-j] && newLong[i-j].toString().length < chunk)
-    {
-      newLong[i-j] =(getLast(overflow,chunk-newLong[i-j].toString().length) * (10 ** newLong[i-j].toString().length) + newLong[i-j]);
-    
-      overflow = parseInt(newLong[i-1]/(10**(chunk-newLong[i-1].toString().length)))
-      newLong.push(overflow)
-    }else{
+}
+  if (overflow !== 0 ) {
     newLong.push(overflow);
-      }
-    
     newDegree += overflow.toString(10).length;
   }
+  
+  console.log(newLong)
   return new Long(newLong, newDegree);
 }

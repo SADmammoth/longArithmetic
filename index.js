@@ -1,8 +1,10 @@
+
+
 (function () {
   console.time();
   let long = new Long('30218');
   let long2 = new Long('512');
-  console.log(long2,long.divide(long2), long.divide(long2).toString());
+  console.log(long.subtract(long2).toString());
   console.timeLog();
 })();
 
