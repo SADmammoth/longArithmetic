@@ -29,9 +29,7 @@ function Long(numberString, degree) {
   let methods = {
     toString: () => {
       return (
-        (self.number[0] < 0 || self.number[self.number.length - 1] < 0
-          ? '-'
-          : '') +
+        (self.number[self.number.length - 1] < 0 ? '-' : '') +
         [...self.number]
           .reverse()
           .map((number, index) => {
@@ -56,7 +54,7 @@ function Long(numberString, degree) {
     subtract: (long) => {
       return operation(
         self,
-        long,
+        long.negate(),
         chunk,
         (a, b, o) => {
           if (a > b) {
@@ -109,6 +107,9 @@ function Long(numberString, degree) {
         return 1;
       }
       return self.compareModule(long);
+    },
+    negate: () => {
+      return { ...self, number: [...self.number.map((num) => -num)] };
     },
     compareModule: (long) => {
       if (self.degree !== long.degree) {
@@ -234,10 +235,8 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
   let sum = 0;
   let overflow = 0;
   let newLong = [];
-  let newDegree = big.degree;
 
-  let negativeResult = big.number[0] < 0 || !comparison;
-  let currentChunk;
+  let negativeResult = big.number[0] < 0;
   let i;
   let j = 1;
 
@@ -266,9 +265,11 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
   }
   if (overflow !== 0) {
     newLong.push(overflow);
-    newDegree += overflow.toString(10).length;
   }
 
+  let newDegree =
+    (newLong.length - 1) * chunk +
+    newLong[newLong.length - 1].toString(10).length;
   // console.log(newLong);
   return new Long(newLong, newDegree);
 }
