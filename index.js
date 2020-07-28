@@ -9,10 +9,9 @@
     let long2 = new Long(two);
     // console.log(+one - two);
     // console.log(long.subtract(long2).toString());
-    let res = parseInt(long.add(long2).toString());
-    let expected = parseInt(one) + parseInt(two);
-    if (expected !== res) {
-      console.log('BAD', one, two, expected, res, long.add(long2));
+    let res = parseInt(long.multiply(long2).toString());
+    if (+one * two !== res) {
+      console.log('BAD', one, two, +one * two, res, long.multiply(long2));
       // alert('bad', one, two);
     }
     // console.timeLog();
