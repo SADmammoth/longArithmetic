@@ -1,5 +1,10 @@
+
+
+
 (function () {
-  for (let i = 0; i < 1000000; i++) {
+  eruda.init()
+  window.console = eruda.get("console");
+  for (let i = 0; i < 100; i++) {
     // console.time();
     let one = generateNum(1, 1, 100000);
     let two = generateNum(1, 1, 100000);
@@ -9,9 +14,9 @@
     let long2 = new Long(two);
     // console.log(+one - two);
     // console.log(long.subtract(long2).toString());
-    let res = parseInt(long.subtract(long2).toString());
-    if (+one - two !== res) {
-      console.log('BAD', one, two, +one - two, res, long.subtract(long2));
+    let res = parseInt(long.multiply(long2).toString());
+    if (+one * two !== res) {
+      console.log('BAD', one, two, +one * two, res, long.multiply(long2));
       // alert('bad', one, two);
     }
     // console.timeLog();

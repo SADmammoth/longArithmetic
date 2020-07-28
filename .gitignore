@@ -1,3 +1,7 @@
 node_modules
 .vscode
 .dcoder_run
+.ssh
+.upm
+core.256
+*.json

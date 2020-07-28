@@ -54,7 +54,7 @@ function Long(numberString, degree) {
       return operation(self, long, chunk, (a, b, o) => a + b + o, false);
     },
     subtract: (long) => {
-      return operation(
+      return new Long(...operation(
         self,
         long,
         chunk,
@@ -85,10 +85,18 @@ function Long(numberString, degree) {
           return a > b ? 10 ** chunk + ch - a + b + o : b - a + o;
         },
         true
-      );
+      ));
     },
     multiply: (long) => {
-      return operation(self, long, chunk, (a, b) => a * b, false);
+      let sums =  [];
+      return operation(self, long, chunk, (i, o, small, big) => {
+        let a = small.number[i];
+        let b = big.number[i];
+        small.forEach(num=>sums.push(a*b));
+        if(index === big.number.length-1){
+          
+    }
+      }, let console = eruda.get("console"); acc.sum(new Long(el)), new Long(0));
     },
     divide: (long) => {
       return operation(self, long, chunk, (a, b) => a / b, true);
@@ -247,7 +255,7 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
       // console.log(sum);
     } else {
       // console.log('k');
-      sum = numberOperation(small.number[i], big.number[i], overflow);
+      sum = numberOperation(i, overflow, small, big);
     }
 
     overflow = parseInt(sum / 10 ** chunk);
@@ -269,6 +277,6 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
     newDegree += overflow.toString(10).length;
   }
 
-  // console.log(newLong);
-  return new Long(newLong, newDegree);
+  // console.log(newLong);в
+  return newLong, newDegree;
 }
