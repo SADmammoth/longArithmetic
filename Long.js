@@ -1,8 +1,8 @@
 import sliceInt from './helpers/sliceInt';
 import sliceNumber from './helpers/sliceNumber';
 
-function Long(numberString) {
-  let chunk = 8;
+export default function Long(numberString, degree) {
+  let chunk = 4;
 
   let number;
   let numberLength = degree;
@@ -266,36 +266,6 @@ function Long(numberString) {
 
 function getLast(int, count) {
   return int % 10 ** count;
-}
-
-function sliceInt(int, limit, chunk) {
-  return int / 10 ** (chunk - limit);
-}
-
-function sliceNumber(number, limit, chunk) {
-  if (limit >= chunk * number.length) {
-    return number;
-  }
-
-  let int = parseInt(limit / chunk);
-  let mod = limit % chunk;
-
-  if (limit < chunk) {
-    return [parseInt(sliceInt(number[0], limit))];
-  }
-
-  if (!mod) {
-    return sliceByChunk();
-  }
-
-  return [
-    ...number.slice(0, int),
-    parseInt(sliceInt(sliceByChunk()[int], mod)),
-  ];
-}
-
-function sliceByChunk() {
-  return number.slice(0, int + 1);
 }
 
 function splitLittleEndian(str, chunk) {
