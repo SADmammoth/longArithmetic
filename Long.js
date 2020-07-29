@@ -1,5 +1,5 @@
 function Long(numberString, degree) {
-  let chunk = 4;
+  let chunk = 2;
   let number;
   let numberLength = degree;
   if (typeof numberString === 'number') {
@@ -49,14 +49,52 @@ function Long(numberString, degree) {
       self.number = sliceNumber(self.number, limit);
     },
     add: (long) => {
-      return operation(self, long, chunk, (a, b, o) => a + b + o, false);
+      if (!self.number[self.number.length - 1]) {
+        return long;
+      } else if (!long.number[long.number.length - 1]) {
+        return self;
+      }
+      let { newLong, newDegree } = operation(
+        self,
+        long,
+        chunk,
+        (i, o, small, big) => {
+          let sum;
+          let a = small.number[i];
+          let b = big.number[i];
+          if (!small.number[i]) {
+            sum = b + o;
+            return {
+              sum: getLast(sum, chunk),
+              overflow: parseInt(sum / 10 ** chunk),
+            };
+          }
+          if (!big.number[i]) {
+            sum = a + o;
+            return {
+              sum: getLast(sum, chunk),
+              overflow: parseInt(sum / 10 ** chunk),
+            };
+          }
+          sum = a + b + o;
+          return {
+            sum: getLast(sum, chunk),
+            overflow: parseInt(sum / 10 ** chunk),
+          };
+        },
+        false
+      );
+      return new Long(newLong, newDegree);
     },
     subtract: (long) => {
-      return new Long(...operation(
+      let { newLong, newDegree } = operation(
         self,
         long.negate(),
         chunk,
-        (a, b, o) => {
+        (i, o, small, big) => {
+          let sum;
+          let a = small.number[i];
+          let b = big.number[i];
           if (a > b) {
             let ch = (b) => b.toString(10).length;
             let res = b + o;
@@ -72,29 +110,95 @@ function Long(numberString, degree) {
             //   res += 9 * 10 ** i;
             // }
             // console.log(res);
-            return 10 ** chunk + res - a + 10 ** chunk;
+            sum = 10 ** chunk + res - a + 10 ** chunk;
+            return {
+              sum: getLast(sum, chunk),
+              overflow: -parseInt(sum / 10 ** chunk),
+            };
             // if (ch(b) < chunk) {
             //   return 10 ** chunk + res;
             // }
             // return res;
           }
-          return b - a + o;
-          // console.log(a > b ? 10 ** chunk + ch - a + b + o : b - a + o);
-          return a > b ? 10 ** chunk + ch - a + b + o : b - a + o;
+          sum = b - a + o;
+          return {
+            sum: getLast(sum, chunk),
+            overflow: -parseInt(sum / 10 ** chunk),
+          };
         },
         true
-      ));
+      );
+      return new Long(newLong, newDegree);
     },
     multiply: (long) => {
-      let sums =  [];
-      return operation(self, long, chunk, (i, o, small, big) => {
-        let a = small.number[i];
-        let b = big.number[i];
-        small.forEach(num=>sums.push(a*b));
-        if(index === big.number.length-1){
-          
-    }
-      }, let console = eruda.get("console"); acc.sum(new Long(el)), new Long(0));
+      if (
+        !self.number[self.number.length - 1] ||
+        !long.number[long.number.length - 1]
+      ) {
+        return new Long(0);
+      }
+      let sums = [];
+      let { newLong, newDegree } = operation(
+        self,
+        long,
+        chunk,
+        (i, o, small, big) => {
+          let sum;
+          sums = [];
+          // if (!small.number[small.number.length - 1]) {
+          //   sum = parseInt(new Long(o.toString() + '00').toString());
+          //   return {
+          //     sum,
+          //     overflow: 0,
+          //   };
+          // }
+          let a = small.number[i] || 0;
+          let b = big.number[i];
+          big.number.forEach((num) => sums.push(a * num));
+
+          let res = parseInt(
+            sums
+              .reduce((acc, el, ind) => {
+                // console.log(
+                //   el.toString(10) +
+                //     Array(ind * chunk + i)
+                //       .fill('0')
+                //       .join(''),
+                //   new Long(
+                //     el.toString(10) +
+                //       Array(ind * chunk + i)
+                //         .fill('0')
+                //         .join('')
+                //   )
+                // );
+                if (!el) {
+                  return acc;
+                }
+
+                return acc.add(
+                  new Long(
+                    el.toString(10) +
+                      Array((ind + i) * chunk)
+                        .fill('0')
+                        .join('')
+                  )
+                );
+              }, new Long(0))
+              .toString()
+          );
+
+          return {
+            sum: res,
+            overflow: 0,
+          };
+        },
+        false,
+        true
+      );
+
+      return newLong.reduce((acc, el, i) => {
+        return acc.add(new Long(el.toString()));
+      }, new Long(0));
     },
     divide: (long) => {
       return operation(self, long, chunk, (a, b) => a / b, true);
@@ -232,6 +336,7 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
   let small;
   let big;
   let comparison = self.compareModule(long) > 0;
+
   if (comparison) {
     small = { ...long, number: [...long.number] };
     big = { ...self, number: [...self.number] };
@@ -239,8 +344,19 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
     big = { ...long, number: [...long.number] };
     small = { ...self, number: [...self.number] };
   }
+
+  // if (!small.number[small.number.length - 1]) {
+  //   let check = numberOperation(0, 0, new Long(0), new Long(1));
+  //   console.log(check);
+  //   if (!check) {
+  //     return { newLong: [0], newDegree: 1 };
+  //   } else if (check === 1) {
+  //     return { newLong: long.number, newDegree: long.degree };
+  //     return check;
+  //   }
+  // }
   // console.log(small, big);
-  let sum = 0;
+  let sum;
   let overflow = 0;
   let newLong = [];
 
@@ -250,17 +366,16 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
 
   for (i = 0; i < big.number.length; i++) {
     if (small.number[i] === undefined) {
-      sum = big.number[i] + overflow;
+      ({ sum, overflow } = numberOperation(i, overflow, new Long(0), big));
       // console.log(sum);
     } else {
       // console.log('k');
-      sum = numberOperation(i, overflow, small, big);
+      ({ sum, overflow } = numberOperation(i, overflow, small, big));
     }
 
-    overflow = parseInt(sum / 10 ** chunk);
-    if (negativeOverflow) {
-      overflow = -overflow;
-    }
+    // if (negativeOverflow) {
+    //   overflow = -overflow;
+    // }
 
     if (sum !== 0) {
       if (negativeResult) {
@@ -269,12 +384,34 @@ function operation(self, long, chunk, numberOperation, negativeOverflow) {
         sum = abs(sum);
       }
     }
-    newLong.push(getLast(sum, chunk));
+    newLong.push(sum);
   }
-  if (overflow !== 0) {
+  // if (overflow !== 0) {
+  //   if (newLong[newLong.length - 1] < 10 ** (chunk - 1)) {
+  //     newLong[newLong.length - 1] +=
+  //       overflow * 10 ** newLong[newLong.length - 1].toString.length;
+  //     overflow = parseInt(newLong[newLong.length - 1] / 10 ** chunk);
+  //   }
+  // }
+
+  // let newDegree =
+  //   big.degree +
+  //   (newLong[newLong.length - 1].toString(10).length -
+  //     big.number[big.number.length - 1].toString(10).length);
+  let newDegree = big.degree;
+  let diff =
+    newLong[newLong.length - 1].toString(10).length -
+    big.number[big.number.length - 1].toString(10).length;
+
+  if (diff > 0) {
+    newDegree += diff;
+  }
+
+  if (overflow != 0) {
     newLong.push(overflow);
+    newDegree += overflow.toString(10).length;
   }
 
   // console.log(newLong);в
-  return newLong, newDegree;
+  return { newLong, newDegree };
 }
