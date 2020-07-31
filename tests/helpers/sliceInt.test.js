@@ -1,4 +1,4 @@
-import sliceInt from '../helpers/sliceInt';
+import sliceInt from '../../helpers/methods/sliceInt';
 
 describe('sliceInt', () => {
   test('Slices digits of integer correctly (valid input)', () => {
