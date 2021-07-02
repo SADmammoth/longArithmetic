@@ -1,4 +1,4 @@
-import testOperation from './testOperation';
+import testOperation from './helpers/testOperation';
 
 describe('Long.add', () => {
   describe('Works for 10000 of [1,100] numbers', () => {
@@ -27,10 +27,10 @@ describe('Long.add', () => {
       }
     );
   });
-  describe('Works for 10000 of [1000,10000] numbers', () => {
+  describe('Works for 10000 of [1000,100000] numbers', () => {
     testOperation(
       10000,
-      [1000, 10000],
+      [1000, 100000],
       (a, b) => parseInt(a) + parseInt(b),
       (a, b) => a.add(b),
       (expected, actual, message) => {
@@ -84,10 +84,10 @@ describe('Long.multiply', () => {
       }
     );
   });
-  describe('Works for 10000 of [1000,10000] numbers', () => {
+  describe('Works for 10000 of [1000,100000 numbers', () => {
     testOperation(
       10000,
-      [1000, 10000],
+      [1000, 100000],
       (a, b) => parseInt(a) * parseInt(b),
       (a, b) => a.multiply(b),
       (expected, actual, message) => {

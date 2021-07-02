@@ -29,5 +29,5 @@ export default function splitLittleEndian(str, chunk) {
       number[index + 1] = -number[index + 1];
     }
   }
-  return number;
+  return number.filter((val) => val !== '');
 }

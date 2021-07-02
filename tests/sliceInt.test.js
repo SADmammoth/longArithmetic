@@ -1,4 +1,4 @@
-import sliceInt from '../../helpers/methods/sliceInt';
+import sliceInt from '../src/helpers/sliceInt';
 
 describe('sliceInt', () => {
   test('Slices digits of integer correctly (valid input)', () => {
@@ -9,6 +9,17 @@ describe('sliceInt', () => {
     let actual = sliceInt(integer, limit, chunk);
 
     let expected = 12345;
+
+    expect(actual).toBe(expected);
+  });
+  test('Slices digits of integer correctly (negative number)', () => {
+    let integer = -123456789;
+    let limit = 5;
+    let chunk = 9;
+
+    let actual = sliceInt(integer, limit, chunk);
+
+    let expected = -12345;
 
     expect(actual).toBe(expected);
   });

@@ -1,22 +1,29 @@
 import numberGenerator from './numberGenerator';
-import Long from '../Long';
+import Long from '../../src/Long';
 
 export default function testOperation(
   numbersCount,
   numberRange = [1, 10],
   originalOperation,
   implementedOperation,
-  assert
+  assert,
+  secondNumberRange
 ) {
   for (let i = 0; i < numbersCount; i++) {
     let number1, number2;
 
     if (typeof numberRange === 'number') {
       number1 = numberGenerator(0, 0, numberRange);
-      number2 = numberGenerator(0, 0, numberRange);
     } else {
       number1 = numberGenerator(...numberRange);
-      number2 = numberGenerator(...numberRange);
+    }
+
+    if (!secondNumberRange) secondNumberRange = numberRange;
+
+    if (typeof secondNumberRange === 'number') {
+      number2 = numberGenerator(0, 0, secondNumberRange);
+    } else {
+      number2 = numberGenerator(...secondNumberRange);
     }
 
     let long1 = new Long(number1);

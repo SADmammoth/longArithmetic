@@ -1,4 +1,4 @@
-import sliceNumber from '../../helpers/methods/sliceNumber';
+import sliceNumber from '../src/helpers/sliceNumber';
 
 describe('sliceNumber', () => {
   test('Returns original number, when limit is more than number length', () => {

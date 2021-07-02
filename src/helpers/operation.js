@@ -22,7 +22,12 @@ export default function operation(self, long, numberOperation) {
 
   for (i = 0; i < big.number.length; i++) {
     if (small.number[i] === undefined) {
-      ({ sum, overflow } = numberOperation(i, overflow, new Long(0), big));
+      ({ sum, overflow } = numberOperation(
+        i,
+        overflow,
+        new self._constructor(0),
+        big
+      ));
     } else {
       ({ sum, overflow } = numberOperation(i, overflow, small, big));
     }

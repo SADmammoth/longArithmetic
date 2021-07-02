@@ -1,5 +1,3 @@
-import numberLength from './numberLength';
-
 import len from './numberLength';
 import str from './numberToString';
 import int from './stringToInt';
@@ -10,7 +8,7 @@ export default function numberInit(numberInput, chunk, maxDegree, degree) {
   let number;
   let numberLength = degree;
   if (typeof numberInput === 'number') {
-    number = [int(str(numberInput).slice(0, chunk))];
+    number = [int(str(numberInput).slice(0, chunk))[0]];
     numberLength = len(number);
   } else if (numberInput instanceof Array) {
     if (!isNumberArray(numberInput)) {

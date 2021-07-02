@@ -1,8 +1,8 @@
-import str from '../numberToString';
-import { abs } from '../mathFunctions';
+import str from '../helpers/numberToString';
+import { abs } from '../helpers/mathFunctions';
 
-export default function toString(self, chunk) {
-  let { number: selfNum, degree } = self;
+export default (self) => {
+  let { number: selfNum, degree, chunk } = self;
   let string = [...selfNum]
     .reverse()
     .map((number, index) => {
@@ -15,4 +15,4 @@ export default function toString(self, chunk) {
     .slice(0, degree);
 
   return (self.isNegative() ? '-' : '') + string;
-}
+};
